@@ -2,9 +2,11 @@ const request = require("supertest");
 const app = require("../../app");
 const newTodo = require("../mock-data/new-todo.json");
 
-const endpointUrl = "/todos";
+const endpointUrl = "/todos/";
 
 jest.setTimeout(5000);
+
+let firstTodo;
 describe(endpointUrl, () =>{
 
     it("GET " + endpointUrl, async () => {
@@ -14,6 +16,21 @@ describe(endpointUrl, () =>{
         expect(Array.isArray(response.body)).toBeTruthy();
         expect(response.body[0].title).toBeDefined();
         expect(response.body[0].done).toBeDefined();
+        firstTodo = response.body[0];
+    });
+
+    it("GET by Id" + endpointUrl + ":todoId", async () => {
+        const response = await request(app)
+            .get(endpointUrl + firstTodo._id);
+        expect(response.statusCode).toBe(200);
+        expect(response.body.title).toBe(firstTodo.title);
+        expect(response.body.done).toBe(firstTodo.done);
+    });
+
+    it("GET by Id doesn't exist" + endpointUrl + ":todoId", async () => {
+        const response = await request(app)
+            .get(endpointUrl + "61aee25a2519bb5aac3a8b68");
+        expect(response.statusCode).toBe(404);
     });
 
     it("POST " + endpointUrl, async () => {
