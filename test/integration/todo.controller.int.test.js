@@ -6,7 +6,8 @@ const endpointUrl = "/todos/";
 
 jest.setTimeout(5000);
 
-let firstTodo;
+let firstTodo, newTodoId;
+
 describe(endpointUrl, () =>{
 
     it("GET " + endpointUrl, async () => {
@@ -40,6 +41,7 @@ describe(endpointUrl, () =>{
         expect(response.statusCode).toBe(201);
         expect(response.body.title).toBe(newTodo.title);
         expect(response.body.done).toBe(newTodo.done);
+        newTodoId = response.body._id;
     });
 
     it("should return error 500 on malformed data with POST" + endpointUrl, async () => {
@@ -51,6 +53,30 @@ describe(endpointUrl, () =>{
             { 
                 message: "Todo validation failed: done: Path `done` is required."
             });
+    });
+
+    it("PUT " + endpointUrl + ":todoId", async () => {
+        const testData = {
+            title: "Make integration test for PUT",
+            done: true
+        };
+        const response = await request(app)
+            .put(endpointUrl + newTodoId)
+            .send(testData);
+        expect(response.statusCode).toBe(200);
+        expect(response.body.title).toBe(testData.title);
+        expect(response.body.done).toBe(testData.done);
+    });
+
+    it("PUT doesn't exist" + endpointUrl + ":todoId", async () => {
+        const testData = {
+            title: "Make integration test for PUT",
+            done: true
+        };
+        const response = await request(app)
+            .put(endpointUrl + "61aee25a2519bb5aac3a8b68")
+            .send(testData);
+        expect(response.statusCode).toBe(404);
     });
 
 });
