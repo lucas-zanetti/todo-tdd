@@ -8,6 +8,13 @@ jest.setTimeout(5000);
 
 let firstTodo, newTodoId;
 
+const nonExistingTodoId = "61aee25a2519bb5aac3a8b68";
+
+const testData = {
+    title: "Make integration test for PUT",
+    done: true
+};
+
 describe(endpointUrl, () =>{
 
     it("GET " + endpointUrl, async () => {
@@ -30,7 +37,7 @@ describe(endpointUrl, () =>{
 
     it("GET by Id doesn't exist" + endpointUrl + ":todoId", async () => {
         const response = await request(app)
-            .get(endpointUrl + "61aee25a2519bb5aac3a8b68");
+            .get(endpointUrl + nonExistingTodoId);
         expect(response.statusCode).toBe(404);
     });
 
@@ -56,10 +63,6 @@ describe(endpointUrl, () =>{
     });
 
     it("PUT " + endpointUrl + ":todoId", async () => {
-        const testData = {
-            title: "Make integration test for PUT",
-            done: true
-        };
         const response = await request(app)
             .put(endpointUrl + newTodoId)
             .send(testData);
@@ -69,13 +72,23 @@ describe(endpointUrl, () =>{
     });
 
     it("PUT doesn't exist" + endpointUrl + ":todoId", async () => {
-        const testData = {
-            title: "Make integration test for PUT",
-            done: true
-        };
         const response = await request(app)
-            .put(endpointUrl + "61aee25a2519bb5aac3a8b68")
+            .put(endpointUrl + nonExistingTodoId)
             .send(testData);
+        expect(response.statusCode).toBe(404);
+    });
+
+    it("DELETE " + endpointUrl + ":todoId", async () => {
+        const response = await request(app)
+            .delete(endpointUrl + newTodoId);
+        expect(response.statusCode).toBe(200);
+        expect(response.body.title).toBe(testData.title);
+        expect(response.body.done).toBe(testData.done);
+    });
+
+    it("DELETE not found" + endpointUrl + ":todoId", async () => {
+        const response = await request(app)
+            .delete(endpointUrl + nonExistingTodoId);
         expect(response.statusCode).toBe(404);
     });
 
